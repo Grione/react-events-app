@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
 
@@ -6,8 +7,11 @@ import Header from '../Header.jsx';
 import { deleteEvent, fetchEvent } from '../../utils/http.js';
 import { queryClient } from '../../utils/http.js';
 import LoadingIndicator from '../UI/LoadingIndicator.jsx';
+import Modal from '../UI/Modal.jsx';
 
 export default function EventDetails() {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -31,9 +35,25 @@ export default function EventDetails() {
     mutate({ id: id });
   }
 
+  function handleStartDelete() {
+    setIsDeleting(true);
+  }
+
+  function handleStopDelete() {
+    setIsDeleting(false);
+  }
+
   return (
     <>
       <Outlet />
+      {isDeleting && (<Modal>
+        <h4>Are you sure you want to delete the event?</h4>
+        <p>Deleting an event cannot be prevented.</p>
+        <div className="form-actions">
+          <button className='button-text' onClick={handleStopDelete}>Cancel</button>
+          <button className="button" onClick={deleteEventHandle}>Delete</button>
+        </div>
+      </Modal>)}
       <Header>
         <Link to="/events" className="nav-item">
           View all Events
@@ -46,7 +66,7 @@ export default function EventDetails() {
         <header>
           <h1>{data.title}</h1>
           <nav>
-            <button onClick={deleteEventHandle}>Delete</button>
+            <button onClick={handleStartDelete}>Delete</button>
             <Link to="edit">Edit</Link>
           </nav>
         </header>
